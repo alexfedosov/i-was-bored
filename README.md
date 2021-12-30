@@ -3,7 +3,7 @@
 "I was bored" is a toy programming language which looks like Swift and written in Swift.
 I started it because I was bored, but also to learn more about lexers, parsers, ASTs and all the stuff needed to write an interpreter.
 
-Currently, it has a simple lexer and RELP to try it out:
+Currently, it has a simple lexer and REPL to try it out:
 
 ```
 > swift run iwasbored
