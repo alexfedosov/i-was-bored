@@ -26,6 +26,7 @@ class Scanner {
             lexemeStart = currentCharacterIndex
             scanToken()
         }
+
         lexemeStart = source.endIndex
         addToken(type: .Eof)
         return tokens
