@@ -1,6 +1,6 @@
 class ASTPrinter: Visitor {
-    func visit(expression _: Expression) -> String {
-        ""
+    func visit(expression exp: Expression) -> String {
+        String(describing: exp)
     }
 
     func visit(literal: Literal) -> String {
