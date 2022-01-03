@@ -2,16 +2,33 @@
 protocol Visitor {
   associatedtype T
   func visit(expression node: Expression) -> T
+  func visit(binary node: Binary) -> T
   func visit(grouping node: Grouping) -> T
   func visit(unary node: Unary) -> T
   func visit(literal node: Literal) -> T
-  func visit(binary node: Binary) -> T
 }
 
 class Expression {
 
   func accept<V: Visitor>(visitor: V) -> V.T {
     visitor.visit(expression: self)
+  }
+}
+
+class Binary: Expression {
+  let left: Expression
+  let op: Token
+  let right: Expression
+
+  init(left: Expression, op: Token, right: Expression) {
+    self.left = left
+    self.op = op
+    self.right = right
+    super.init()
+  }
+
+  override func accept<V: Visitor>(visitor: V) -> V.T {
+    visitor.visit(binary: self)
   }
 }
 
@@ -44,31 +61,14 @@ class Unary: Expression {
 }
 
 class Literal: Expression {
-  let value: Any
+  let value: Any?
 
-  init(value: Any) {
+  init(value: Any?) {
     self.value = value
     super.init()
   }
 
   override func accept<V: Visitor>(visitor: V) -> V.T {
     visitor.visit(literal: self)
-  }
-}
-
-class Binary: Expression {
-  let left: Expression
-  let op: Token
-  let right: Expression
-
-  init(left: Expression, op: Token, right: Expression) {
-    self.left = left
-    self.op = op
-    self.right = right
-    super.init()
-  }
-
-  override func accept<V: Visitor>(visitor: V) -> V.T {
-    visitor.visit(binary: self)
   }
 }

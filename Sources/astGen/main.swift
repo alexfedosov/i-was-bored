@@ -102,7 +102,7 @@ let base = "Expression"
 let ast = [
     "Binary": "left: \(base), op: Token, right: \(base)",
     "Grouping": "expression: \(base)",
-    "Literal": "value: Any",
+    "Literal": "value: Any?",
     "Unary": "op: Token, right: \(base)",
 ]
 
