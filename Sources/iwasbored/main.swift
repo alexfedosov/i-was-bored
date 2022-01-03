@@ -4,9 +4,10 @@ import Foundation
 func run(_ source: String) {
     let scanner = Scanner(source: source)
     let tokens = scanner.scanTokens()
-    for token in tokens {
-        print(token)
-    }
+    let parser = Parser(tokens: tokens)
+    let expression = parser.parse()
+    let printer = ASTPrinter()
+    print(expression.accept(visitor: printer))
 }
 
 func runREPL() {
