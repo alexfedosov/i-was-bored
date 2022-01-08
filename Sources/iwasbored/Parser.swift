@@ -9,73 +9,78 @@ final class Parser {
         self.errorReporter = errorReporter
     }
 
-    func parse() -> Expression {
-        expression()
+    func parse() -> Expression? {
+        do {
+            return try expression()
+        } catch {
+            errorReporter.report(error: error)
+            return nil
+        }
     }
 
-    private func expression() -> Expression {
-        equality()
+    private func expression() throws -> Expression {
+        try equality()
     }
 
-    private func equality() -> Expression {
-        var expression = comparison()
+    private func equality() throws -> Expression {
+        var expression = try comparison()
 
         while match(tokenType: [.BangEqual, .EqualEqual]) {
             let op = previous()
-            let right = comparison()
+            let right = try comparison()
             expression = Binary(left: expression, op: op, right: right)
         }
 
         return expression
     }
 
-    private func comparison() -> Expression {
-        var expression = term()
+    private func comparison() throws -> Expression {
+        var expression = try term()
 
         while match(tokenType: [.More, .MoreEqual, .Less, .LessEqual]) {
             let op = previous()
-            let right = term()
+            let right = try term()
             expression = Binary(left: expression, op: op, right: right)
         }
 
         return expression
     }
 
-    private func term() -> Expression {
-        var expression = factor()
+    private func term() throws -> Expression {
+        var expression = try factor()
 
         while match(tokenType: [.Minus, .Plus]) {
             let op = previous()
-            let right = factor()
+            let right = try factor()
             expression = Binary(left: expression, op: op, right: right)
         }
 
         return expression
     }
 
-    private func factor() -> Expression {
-        var expression = unary()
+    private func factor() throws -> Expression {
+        var expression = try unary()
 
         while match(tokenType: [.Slash, .Star]) {
             let op = previous()
-            let right = unary()
+            let right = try unary()
             expression = Binary(left: expression, op: op, right: right)
         }
 
         return expression
     }
 
-    private func unary() -> Expression {
+    private func unary() throws -> Expression {
         if match(tokenType: [.Bang, .Minus]) {
             let op = previous()
-            let right = unary()
+            let right = try unary()
             return Unary(op: op, right: right)
         }
 
-        return primary()
+        return try primary()
     }
 
-    private func primary() -> Expression {
+    private func primary() throws -> Expression {
         if match(.True) { return Literal(value: true) }
         if match(.False) { return Literal(value: false) }
         if match(.Nil) { return Literal(value: nil) }
@@ -84,16 +89,12 @@ final class Parser {
         if match(.String) { return Literal(value: previous().lexeme) }
 
         if match(.LeftParen) {
-            let expression = expression()
-            do {
-                try consume(tokenType: .RightParen)
-            } catch {
-                errorReporter.report(error: error)
-            }
+            let expression = try expression()
+            try consume(tokenType: .RightParen)
             return Grouping(expression: expression)
         }
 
-        return Expression()
+        throw ParserError.ExpectedExpression(token: peek())
     }
 }
 

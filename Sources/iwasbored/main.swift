@@ -6,11 +6,11 @@ func run(_ source: String) -> Bool {
     let scanner = Scanner(source: source, errorReporter: errorReporter)
     let tokens = scanner.scanTokens()
     let parser = Parser(tokens: tokens, errorReporter: errorReporter)
-    let expression = parser.parse()
-    if !errorReporter.hasErrors {
+    if let expression = parser.parse(), !errorReporter.hasErrors {
         let printer = ASTPrinter()
         print(expression.accept(visitor: printer))
     }
+
     return errorReporter.hasErrors
 }
 
