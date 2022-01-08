@@ -1,4 +1,4 @@
-class Scanner {
+final class Scanner {
     private let source: String
     private let errorReporter: ErrorReporter
     private var tokens: [Token] = []
