@@ -9,3 +9,13 @@ struct Token {
         self.lexeme = lexeme
     }
 }
+
+extension Token: CustomStringConvertible {
+    var description: String {
+        switch type {
+        case .Newline: fallthrough
+        case .Eof: return type.description
+        default: return lexeme
+        }
+    }
+}

@@ -1,13 +1,17 @@
 import Darwin
 import Foundation
 
-func run(_ source: String) {
-    let scanner = Scanner(source: source)
+func run(_ source: String) -> Bool {
+    let errorReporter = StdOutErrorReporter()
+    let scanner = Scanner(source: source, errorReporter: errorReporter)
     let tokens = scanner.scanTokens()
-    let parser = Parser(tokens: tokens)
+    let parser = Parser(tokens: tokens, errorReporter: errorReporter)
     let expression = parser.parse()
-    let printer = ASTPrinter()
-    print(expression.accept(visitor: printer))
+    if !errorReporter.hasErrors {
+        let printer = ASTPrinter()
+        print(expression.accept(visitor: printer))
+    }
+    return errorReporter.hasErrors
 }
 
 func runREPL() {
@@ -17,33 +21,25 @@ func runREPL() {
         print("> ", terminator: "")
         if let line = readLine() {
             if line.isEmpty { break }
-            run(line)
+            _ = run(line)
         }
     }
     print("Bye..")
 }
 
-func runFile(path: String) throws {
+func runFile(path: String) throws -> Bool {
     let source = try String(contentsOfFile: path, encoding: .utf8)
-    run(source)
+    return run(source)
 }
 
-func error(line: Int, message: String) {
-    hadError = true
-    print("Error at \(line): \(message)")
-}
-
-var hadError = false
-do {
-    if CommandLine.arguments.count < 2 {
-        runREPL()
-    } else {
-        // This should be better, but I don't want to bring argument parser just yet
-        let sourceFilePath = CommandLine.arguments[1]
-        try runFile(path: sourceFilePath)
+if CommandLine.arguments.count < 2 {
+    runREPL()
+} else {
+    // This should be better, but I don't want to bring argument parser just yet
+    let sourceFilePath = CommandLine.arguments[1]
+    if let hasErrors = try? runFile(path: sourceFilePath), !hasErrors {
+        exit(65)
     }
-} catch {
-    print("Error: \(error)")
 }
 
-exit(hadError ? 65 : 0)
+exit(0)

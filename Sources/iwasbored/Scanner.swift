@@ -1,5 +1,6 @@
 class Scanner {
     private let source: String
+    private let errorReporter: ErrorReporter
     private var tokens: [Token] = []
     private var currentCharacterIndex: String.Index
     private var lexemeStart: String.Index
@@ -7,8 +8,9 @@ class Scanner {
     private var isAtEnd: Bool { currentCharacterIndex >= source.endIndex }
     private var keywordMap: [String: TokenType]
 
-    init(source: String) {
+    init(source: String, errorReporter: ErrorReporter) {
         self.source = source
+        self.errorReporter = errorReporter
         currentCharacterIndex = source.startIndex
         lexemeStart = currentCharacterIndex
         keywordMap = [
@@ -59,11 +61,12 @@ class Scanner {
         case "\"": readString()
         case char where isDigit(char: char): readNumber()
         case char where isAlpha(char: char): readIdentifier()
-        case char where char.isNewline: 
+        case char where char.isNewline:
             addToken(type: .Newline)
             line += 1
         case char where char.isWhitespace: break
-        default: error(line: line, message: "unexpected character: \(char)")
+        default:
+            errorReporter.report(error: ParserError.UnexpectedCharacter(line: line, character: char))
         }
     }
 
@@ -101,7 +104,7 @@ class Scanner {
         }
         let lexeme = String(source[lexemeStart ..< currentCharacterIndex])
         if peek() == nil {
-            error(line: line, message: "Unterminated string: \(lexeme)")
+            errorReporter.report(error: ParserError.UnterminatedString(line: line, lexeme: lexeme))
         } else {
             let stringValue = String(lexeme[lexeme.index(after: lexeme.startIndex) ..< lexeme.endIndex])
             let token = Token(lexeme: stringValue, type: .String, line: line)
@@ -140,7 +143,7 @@ class Scanner {
         if let _ = Double(lexeme) {
             addToken(type: .Number)
         } else {
-            error(line: line, message: "Couldn't parse number: \(lexeme)")
+            errorReporter.report(error: ParserError.CouldNotParseNumber(line: line, lexeme: lexeme))
         }
     }
 

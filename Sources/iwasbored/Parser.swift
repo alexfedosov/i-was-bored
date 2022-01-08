@@ -1,12 +1,12 @@
-import Foundation
-
 final class Parser {
     let tokens: [Token]
+    let errorReporter: ErrorReporter
     var currentToken = 0
     var isAtEnd: Bool { currentToken >= tokens.count }
 
-    init(tokens: [Token]) {
+    init(tokens: [Token], errorReporter: ErrorReporter) {
         self.tokens = tokens
+        self.errorReporter = errorReporter
     }
 
     func parse() -> Expression {
@@ -83,6 +83,16 @@ final class Parser {
         if match(.Number) { return Literal(value: Double(previous().lexeme)) }
         if match(.String) { return Literal(value: previous().lexeme) }
 
+        if match(.LeftParen) {
+            let expression = expression()
+            do {
+                try consume(tokenType: .RightParen)
+            } catch {
+                errorReporter.report(error: error)
+            }
+            return Grouping(expression: expression)
+        }
+
         return Expression()
     }
 }
@@ -118,5 +128,13 @@ extension Parser {
         guard !isAtEnd else { return tokens[tokens.count - 1] }
         currentToken += 1
         return previous()
+    }
+
+    @discardableResult
+    func consume(tokenType: TokenType) throws -> Token {
+        guard check(tokenType: [tokenType]) else {
+            throw ParserError.TokenNotFound(token: peek(), expected: tokenType)
+        }
+        return advance()
     }
 }
