@@ -2,13 +2,13 @@ import Foundation
 
 class Interpreter: Visitor {
     enum RuntimeError: LocalizedError {
-        case TypeError(expected: String, found: String)
+        case TypeError(line: Int, expected: String, found: String)
 
         var errorDescription: String? {
             let desc: String
             switch self {
-            case let .TypeError(expected, found):
-                desc = "Type error: expected \(expected), found \(found)"
+            case let .TypeError(line, expected, found):
+                desc = "Type error at line \(line): expected \(expected), found \(found)"
             }
             return "[Runtime error]: \(desc)"
         }
@@ -47,8 +47,8 @@ class Interpreter: Visitor {
 
         switch binary.op.type {
         case .Minus:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) - (right as! Double)
         case .Plus:
             if let left = left as? Double,
@@ -62,34 +62,34 @@ class Interpreter: Visitor {
                 return left + right
             }
             if left is Double {
-                try typeCheck(value: right, type: Double.self, typeName: "Double")
+                try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             } else if left is String {
-                try typeCheck(value: right, type: String.self, typeName: "String")
+                try typeCheck(value: right, type: String.self, typeName: "String", line: binary.op.line)
             }
-            throw RuntimeError.TypeError(expected: "Double or String", found: String(reflecting: left.self))
+            throw RuntimeError.TypeError(line: binary.op.line, expected: "Double or String", found: String(reflecting: left.self))
         case .Slash:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) / (right as! Double)
         case .Star:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) * (right as! Double)
         case .Less:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) < (right as! Double)
         case .More:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) > (right as! Double)
         case .LessEqual:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) <= (right as! Double)
         case .MoreEqual:
-            try typeCheck(value: left, type: Double.self, typeName: "Double")
-            try typeCheck(value: right, type: Double.self, typeName: "Double")
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
             return (left as! Double) >= (right as! Double)
         case .EqualEqual:
             return isEqual(left, right)
@@ -141,13 +141,13 @@ extension Interpreter {
             isTypedEqual(type: String.self, a: left, b: right)
     }
 
-    func typeCheck<T>(value: Any?, type _: T.Type, typeName: String) throws {
+    func typeCheck<T>(value: Any?, type _: T.Type, typeName: String, line: Int) throws {
         guard let value = value else {
-            throw Self.RuntimeError.TypeError(expected: typeName, found: "nil")
+            throw Self.RuntimeError.TypeError(line: line, expected: typeName, found: "nil")
         }
 
         guard value is T else {
-            throw Self.RuntimeError.TypeError(expected: typeName, found: String(reflecting: value.self))
+            throw Self.RuntimeError.TypeError(line: line, expected: typeName, found: String(reflecting: value.self))
         }
     }
 }
