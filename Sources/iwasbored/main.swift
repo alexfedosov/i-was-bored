@@ -2,18 +2,22 @@ import Darwin
 import Foundation
 
 class IWasBored {
-    let interpreter = Interpreter()
+    let interpreter: Interpreter
+    let errorReporter: ErrorReporter
+
+    init() {
+        errorReporter = StdOutErrorReporter()
+        interpreter = Interpreter(errorReporter: errorReporter)
+    }
 
     func run(_ source: String) -> Bool {
-        let errorReporter = StdOutErrorReporter()
+        errorReporter.reset()
         let scanner = Scanner(source: source, errorReporter: errorReporter)
         let tokens = scanner.scanTokens()
         let parser = Parser(tokens: tokens, errorReporter: errorReporter)
         if let expression = parser.parse(), !errorReporter.hasErrors {
             if let value = interpreter.interpret(expression: expression) {
                 print(value)
-            } else {
-                print("nil")
             }
         }
 

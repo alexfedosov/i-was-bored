@@ -41,8 +41,8 @@ class ASTGen {
     }
 
     private func writeClassVisitorMethod(name: String, isOverride: Bool = true) {
-        addLine("\(isOverride ? "override " : "")func accept<V: Visitor>(visitor: V) -> V.T {")
-        addLine("visitor.visit(\(name.lowercased()): self)")
+        addLine("\(isOverride ? "override " : "")func accept<V: Visitor>(visitor: V) throws -> V.T {")
+        addLine("try visitor.visit(\(name.lowercased()): self)")
         addLine("}")
     }
 
@@ -67,7 +67,7 @@ class ASTGen {
         addLine("protocol Visitor {")
         addLine("associatedtype T")
         for name in classNames {
-            addLine("func visit(\(name.lowercased()) node: \(name)) -> T")
+            addLine("func visit(\(name.lowercased()) node: \(name)) throws -> T")
         }
         addLine("}")
     }

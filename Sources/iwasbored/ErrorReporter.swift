@@ -1,6 +1,7 @@
 protocol ErrorReporter {
     var hasErrors: Bool { get }
     func report(error: Error)
+    func reset()
 }
 
 class StdOutErrorReporter: ErrorReporter {
@@ -9,5 +10,9 @@ class StdOutErrorReporter: ErrorReporter {
     func report(error: Error) {
         hasErrors = true
         print(error.localizedDescription)
+    }
+
+    func reset() {
+        hasErrors = false
     }
 }
