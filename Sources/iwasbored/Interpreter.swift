@@ -1,6 +1,8 @@
 import Foundation
 
-class Interpreter: Visitor {
+class Interpreter: ExpressionVisitor {
+    typealias T = Any?
+
     enum RuntimeError: LocalizedError {
         case TypeError(line: Int, expected: String, found: String)
 
@@ -33,22 +35,22 @@ class Interpreter: Visitor {
         try expression.accept(visitor: self)
     }
 
-    func visit(expression _: Expression) throws -> Any? {
+    func visit(node _: Expression) throws -> Any? {
         nil
     }
 
-    func visit(literal: Literal) throws -> Any? {
-        literal.value
+    func visit(node: LiteralExpression) throws -> Any? {
+        node.value
     }
 
-    func visit(binary: Binary) throws -> Any? {
-        let left = try evaluate(expression: binary.left)
-        let right = try evaluate(expression: binary.right)
+    func visit(node: BinaryExpression) throws -> Any? {
+        let left = try evaluate(expression: node.left)
+        let right = try evaluate(expression: node.right)
 
-        switch binary.op.type {
+        switch node.op.type {
         case .Minus:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) - (right as! Double)
         case .Plus:
             if let left = left as? Double,
@@ -62,34 +64,34 @@ class Interpreter: Visitor {
                 return left + right
             }
             if left is Double {
-                try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+                try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             } else if left is String {
-                try typeCheck(value: right, type: String.self, typeName: "String", line: binary.op.line)
+                try typeCheck(value: right, type: String.self, typeName: "String", line: node.op.line)
             }
-            throw RuntimeError.TypeError(line: binary.op.line, expected: "Double or String", found: String(reflecting: left.self))
+            throw RuntimeError.TypeError(line: node.op.line, expected: "Double or String", found: String(reflecting: left.self))
         case .Slash:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) / (right as! Double)
         case .Star:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) * (right as! Double)
         case .Less:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) < (right as! Double)
         case .More:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) > (right as! Double)
         case .LessEqual:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) <= (right as! Double)
         case .MoreEqual:
-            try typeCheck(value: left, type: Double.self, typeName: "Double", line: binary.op.line)
-            try typeCheck(value: right, type: Double.self, typeName: "Double", line: binary.op.line)
+            try typeCheck(value: left, type: Double.self, typeName: "Double", line: node.op.line)
+            try typeCheck(value: right, type: Double.self, typeName: "Double", line: node.op.line)
             return (left as! Double) >= (right as! Double)
         case .EqualEqual:
             return isEqual(left, right)
@@ -100,13 +102,13 @@ class Interpreter: Visitor {
         return nil // catch error
     }
 
-    func visit(grouping: Grouping) throws -> Any? {
-        try evaluate(expression: grouping.expression)
+    func visit(node: GroupingExpression) throws -> Any? {
+        try evaluate(expression: node.expression)
     }
 
-    func visit(unary: Unary) throws -> Any? {
-        let value = try evaluate(expression: unary.right)
-        switch unary.op.type {
+    func visit(node: UnaryExpression) throws -> Any? {
+        let value = try evaluate(expression: node.right)
+        switch node.op.type {
         case .Minus: return -(value as! Double)
         case .Bang: return !isTruthy(value: value)
         default: return nil // should be unreachable

@@ -28,7 +28,7 @@ final class Parser {
         while match(tokenType: [.BangEqual, .EqualEqual]) {
             let op = previous()
             let right = try comparison()
-            expression = Binary(left: expression, op: op, right: right)
+            expression = BinaryExpression(left: expression, op: op, right: right)
         }
 
         return expression
@@ -40,7 +40,7 @@ final class Parser {
         while match(tokenType: [.More, .MoreEqual, .Less, .LessEqual]) {
             let op = previous()
             let right = try term()
-            expression = Binary(left: expression, op: op, right: right)
+            expression = BinaryExpression(left: expression, op: op, right: right)
         }
 
         return expression
@@ -52,7 +52,7 @@ final class Parser {
         while match(tokenType: [.Minus, .Plus]) {
             let op = previous()
             let right = try factor()
-            expression = Binary(left: expression, op: op, right: right)
+            expression = BinaryExpression(left: expression, op: op, right: right)
         }
 
         return expression
@@ -64,7 +64,7 @@ final class Parser {
         while match(tokenType: [.Slash, .Star]) {
             let op = previous()
             let right = try unary()
-            expression = Binary(left: expression, op: op, right: right)
+            expression = BinaryExpression(left: expression, op: op, right: right)
         }
 
         return expression
@@ -74,24 +74,24 @@ final class Parser {
         if match(tokenType: [.Bang, .Minus]) {
             let op = previous()
             let right = try unary()
-            return Unary(op: op, right: right)
+            return UnaryExpression(op: op, right: right)
         }
 
         return try primary()
     }
 
     private func primary() throws -> Expression {
-        if match(.True) { return Literal(value: true) }
-        if match(.False) { return Literal(value: false) }
-        if match(.Nil) { return Literal(value: nil) }
+        if match(.True) { return LiteralExpression(value: true) }
+        if match(.False) { return LiteralExpression(value: false) }
+        if match(.Nil) { return LiteralExpression(value: nil) }
 
-        if match(.Number) { return Literal(value: Double(previous().lexeme)) }
-        if match(.String) { return Literal(value: previous().lexeme) }
+        if match(.Number) { return LiteralExpression(value: Double(previous().lexeme)) }
+        if match(.String) { return LiteralExpression(value: previous().lexeme) }
 
         if match(.LeftParen) {
             let expression = try expression()
             try consume(tokenType: .RightParen)
-            return Grouping(expression: expression)
+            return GroupingExpression(expression: expression)
         }
 
         throw ParserError.ExpectedExpression(token: peek())
