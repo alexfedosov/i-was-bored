@@ -2,7 +2,7 @@ final class Parser {
     let tokens: [Token]
     let errorReporter: ErrorReporter
     var currentToken = 0
-    var isAtEnd: Bool { currentToken >= tokens.count }
+    var isAtEnd: Bool { tokens[currentToken].type == .Eof }
 
     init(tokens: [Token], errorReporter: ErrorReporter) {
         self.tokens = tokens
@@ -12,7 +12,9 @@ final class Parser {
     func parse() -> [Statement] {
         var statements: [Statement] = []
         do {
-            statements.append(try statement())
+            while !isAtEnd {
+                statements.append(try statement())
+            }
         } catch {
             errorReporter.report(error: error)
         }
@@ -154,4 +156,3 @@ extension Parser {
         return advance()
     }
 }
-
