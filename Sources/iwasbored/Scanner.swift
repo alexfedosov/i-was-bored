@@ -62,7 +62,6 @@ final class Scanner {
         case char where isDigit(char: char): readNumber()
         case char where isAlpha(char: char): readIdentifier()
         case char where char.isNewline:
-            addToken(type: .Newline)
             line += 1
         case char where char.isWhitespace: break
         default:
