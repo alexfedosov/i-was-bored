@@ -9,12 +9,27 @@ final class Parser {
         self.errorReporter = errorReporter
     }
 
-    func parse() -> Expression? {
+    func parse() -> [Statement] {
+        var statements: [Statement] = []
         do {
-            return try expression()
+            statements.append(try statement())
         } catch {
             errorReporter.report(error: error)
-            return nil
+        }
+        return statements
+    }
+
+    private func statement() throws -> Statement {
+        if match(.Print) {
+            try consume(tokenType: .LeftParen)
+            let expression = try expression()
+            try consume(tokenType: .RightParen)
+            try consume(tokenType: .Semicolon)
+            return PrintStatement(expression: expression)
+        } else {
+            let statement = ExpressionStatement(expression: try expression())
+            try consume(tokenType: .Semicolon)
+            return statement
         }
     }
 
@@ -139,3 +154,4 @@ extension Parser {
         return advance()
     }
 }
+

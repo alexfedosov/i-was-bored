@@ -15,10 +15,9 @@ class IWasBored {
         let scanner = Scanner(source: source, errorReporter: errorReporter)
         let tokens = scanner.scanTokens()
         let parser = Parser(tokens: tokens, errorReporter: errorReporter)
-        if let expression = parser.parse(), !errorReporter.hasErrors {
-            if let value = interpreter.interpret(expression: expression) {
-                print(value)
-            }
+        let statements = parser.parse()
+        if !errorReporter.hasErrors {
+            interpreter.interpret(statements: statements)
         }
 
         return errorReporter.hasErrors

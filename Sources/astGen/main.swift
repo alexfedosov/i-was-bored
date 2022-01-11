@@ -83,6 +83,7 @@ let outputFile = CommandLine.arguments[1]
 let generator = ASTGen()
 let statementClass = generator.generate(base: "Statement", definitions: [
     "Expression": "expression: Expression",
+    "Print": "expression: Expression",
 ])
 let expressionClass = generator.generate(base: "Expression", definitions: [
     "Binary": "left: Expression, op: Token, right: Expression",

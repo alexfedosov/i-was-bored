@@ -1,6 +1,6 @@
 import Foundation
 
-class Interpreter: ExpressionVisitor {
+class Interpreter {
     typealias T = Any?
 
     enum RuntimeError: LocalizedError {
@@ -22,22 +22,76 @@ class Interpreter: ExpressionVisitor {
         self.errorReporter = errorReporter
     }
 
-    func interpret(expression: Expression) -> Any? {
+    func interpret(statements: [Statement]) {
         do {
-            return try evaluate(expression: expression)
+            for statement in statements {
+                _ = try statement.accept(visitor: self)
+            }
         } catch {
             errorReporter.report(error: error)
-            return nil
         }
     }
 
     func evaluate(expression: Expression) throws -> Any? {
         try expression.accept(visitor: self)
     }
+}
 
-    func visit(node _: Expression) throws -> Any? {
-        nil
+extension Interpreter {
+    func isTruthy(value: Any?) -> Bool {
+        guard let value = value else { return false }
+        if let value = value as? Bool,
+           value == false
+        {
+            return false
+        } else {
+            return true
+        }
     }
+
+    func isTypedEqual<T: Equatable>(type _: T.Type, a: Any, b: Any) -> Bool {
+        guard let a = a as? T, let b = b as? T else { return false }
+
+        return a == b
+    }
+
+    func isEqual(_ left: Any?, _ right: Any?) -> Bool {
+        guard let left = left, let right = right else {
+            return left == nil && right == nil
+        }
+        return isTypedEqual(type: Double.self, a: left, b: right) ||
+            isTypedEqual(type: Bool.self, a: left, b: right) ||
+            isTypedEqual(type: String.self, a: left, b: right)
+    }
+
+    func typeCheck<T>(value: Any?, type _: T.Type, typeName: String, line: Int) throws {
+        guard let value = value else {
+            throw Self.RuntimeError.TypeError(line: line, expected: typeName, found: "nil")
+        }
+
+        guard value is T else {
+            throw Self.RuntimeError.TypeError(line: line, expected: typeName, found: String(reflecting: value.self))
+        }
+    }
+
+    func stringify(value: Any?) -> String {
+        guard let value = value else { return "nil" }
+
+        if value is Double {
+            let doubleRepresentation = String(value as! Double)
+            if doubleRepresentation.hasSuffix(".0") {
+                return String(doubleRepresentation.dropLast(2))
+            } else {
+                return doubleRepresentation
+            }
+        }
+
+        return String(describing: value)
+    }
+}
+
+extension Interpreter: ExpressionVisitor {
+    func visit(node _: Expression) throws -> Any? { nil }
 
     func visit(node: LiteralExpression) throws -> Any? {
         node.value
@@ -116,40 +170,16 @@ class Interpreter: ExpressionVisitor {
     }
 }
 
-extension Interpreter {
-    func isTruthy(value: Any?) -> Bool {
-        guard let value = value else { return false }
-        if let value = value as? Bool,
-           value == false
-        {
-            return false
-        } else {
-            return true
-        }
+extension Interpreter: StatementVisitor {
+    func visit(node _: Statement) throws -> Any? { nil }
+
+    func visit(node: PrintStatement) throws -> Any? {
+        let value = try evaluate(expression: node.expression)
+        print(stringify(value: value))
+        return nil
     }
 
-    func isTypedEqual<T: Equatable>(type _: T.Type, a: Any, b: Any) -> Bool {
-        guard let a = a as? T, let b = b as? T else { return false }
-
-        return a == b
-    }
-
-    func isEqual(_ left: Any?, _ right: Any?) -> Bool {
-        guard let left = left, let right = right else {
-            return left == nil && right == nil
-        }
-        return isTypedEqual(type: Double.self, a: left, b: right) ||
-            isTypedEqual(type: Bool.self, a: left, b: right) ||
-            isTypedEqual(type: String.self, a: left, b: right)
-    }
-
-    func typeCheck<T>(value: Any?, type _: T.Type, typeName: String, line: Int) throws {
-        guard let value = value else {
-            throw Self.RuntimeError.TypeError(line: line, expected: typeName, found: "nil")
-        }
-
-        guard value is T else {
-            throw Self.RuntimeError.TypeError(line: line, expected: typeName, found: String(reflecting: value.self))
-        }
+    func visit(node: ExpressionStatement) throws -> Any? {
+        try node.expression.accept(visitor: self)
     }
 }

@@ -20,6 +20,7 @@ final class Scanner {
             "true": .True,
             "false": .False,
             "nil": .Nil,
+            "print": .Print,
         ]
     }
 
