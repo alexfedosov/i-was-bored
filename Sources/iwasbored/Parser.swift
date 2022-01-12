@@ -24,7 +24,7 @@ final class Parser {
             if match(.Var) { return try varDeclaration() }
             return try statement()
         } catch {
-            // TODO: syncronize here
+            synchronize()
             errorReporter.report(error: error)
         }
         return nil
@@ -177,5 +177,22 @@ extension Parser {
             throw ParserError.TokenNotFound(token: peek(), expected: tokenType)
         }
         return advance()
+    }
+
+    private func synchronize() {
+        advance()
+
+        let nextStatementStartSet: Set<TokenType> = [
+            .Func,
+            .Var,
+            .Return,
+            .Print,
+        ]
+
+        while !isAtEnd {
+            if previous().type == .Semicolon { return }
+            if nextStatementStartSet.contains(peek().type) { return }
+            advance()
+        }
     }
 }
