@@ -11,14 +11,35 @@ final class Parser {
 
     func parse() -> [Statement] {
         var statements: [Statement] = []
-        do {
-            while !isAtEnd {
-                statements.append(try statement())
+        while !isAtEnd {
+            if let declaration = declaration() {
+                statements.append(declaration)
             }
-        } catch {
-            errorReporter.report(error: error)
         }
         return statements
+    }
+
+    private func declaration() -> Statement? {
+        do {
+            if match(.Var) { return try varDeclaration() }
+            return try statement()
+        } catch {
+            // TODO: syncronize here
+            errorReporter.report(error: error)
+        }
+        return nil
+    }
+
+    private func varDeclaration() throws -> Statement {
+        let name = try consume(tokenType: .Identifier)
+        let initializer: Expression
+        if match(.Equal) {
+            initializer = try expression()
+        } else {
+            initializer = LiteralExpression(value: nil)
+        }
+        try consume(tokenType: .Semicolon)
+        return VarStatement(name: name, initializer: initializer)
     }
 
     private func statement() throws -> Statement {
@@ -104,6 +125,8 @@ final class Parser {
 
         if match(.Number) { return LiteralExpression(value: Double(previous().lexeme)) }
         if match(.String) { return LiteralExpression(value: previous().lexeme) }
+
+        if match(.Identifier) { return VariableExpression(name: previous()) }
 
         if match(.LeftParen) {
             let expression = try expression()

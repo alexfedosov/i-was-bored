@@ -84,12 +84,14 @@ let generator = ASTGen()
 let statementClass = generator.generate(base: "Statement", definitions: [
     "Expression": "expression: Expression",
     "Print": "expression: Expression",
+    "Var": "name: Token, initializer: Expression",
 ])
 let expressionClass = generator.generate(base: "Expression", definitions: [
     "Binary": "left: Expression, op: Token, right: Expression",
     "Grouping": "expression: Expression",
     "Literal": "value: Any?",
     "Unary": "op: Token, right: Expression",
+    "Variable": "name: Token",
 ])
 let output = [statementClass, expressionClass].joined(separator: "\n\n")
 

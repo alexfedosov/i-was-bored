@@ -5,17 +5,21 @@ class Interpreter {
 
     enum RuntimeError: LocalizedError {
         case TypeError(line: Int, expected: String, found: String)
+        case UnknownVariable(line: Int, name: String)
 
         var errorDescription: String? {
             let desc: String
             switch self {
             case let .TypeError(line, expected, found):
                 desc = "Type error at line \(line): expected \(expected), found \(found)"
+            case let .UnknownVariable(line, name):
+                desc = "Unknown variable \(name) at line \(line)"
             }
             return "[Runtime error]: \(desc)"
         }
     }
 
+    let environment = Environment()
     let errorReporter: ErrorReporter
 
     init(errorReporter: ErrorReporter) {
@@ -168,6 +172,10 @@ extension Interpreter: ExpressionVisitor {
         default: return nil // should be unreachable
         }
     }
+
+    func visit(node: VariableExpression) throws -> Any? {
+        return try environment.get(token: node.name)
+    }
 }
 
 extension Interpreter: StatementVisitor {
@@ -181,5 +189,11 @@ extension Interpreter: StatementVisitor {
 
     func visit(node: ExpressionStatement) throws -> Any? {
         try node.expression.accept(visitor: self)
+    }
+
+    func visit(node: VarStatement) throws -> Any? {
+        let value = try evaluate(expression: node.initializer)
+        environment.declare(token: node.name, value: value)
+        return nil
     }
 }
