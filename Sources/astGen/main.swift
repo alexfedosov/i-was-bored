@@ -14,12 +14,13 @@ class ASTGen {
     private var output = ""
 
     private func parseStructDefinition(_ definition: String) -> [(name: String, type: String)] {
-        definition.split(separator: ",").map { arg in
-            let property = arg
-                .split(separator: ":")
-                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            return (name: property[0], type: property[1])
-        }
+        definition.split(separator: ",")
+            .map { arg in
+                let property = arg
+                    .split(separator: ":")
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                return (name: property[0], type: property[1])
+            }
     }
 
     private func writeStructProperties(_ properties: [(name: String, type: String)]) {
@@ -47,7 +48,7 @@ class ASTGen {
         addLine("protocol \(base)Visitor {")
         addLine("associatedtype T")
         addLine("func visit(node: \(base)) throws -> T")
-        for name in classNames {
+        for name in classNames.sorted() {
             addLine("func visit(node: \(name + base)) throws -> T")
         }
         addLine("}")
@@ -65,8 +66,8 @@ class ASTGen {
         addLine("func accept<V: \(base)Visitor>(visitor: V) throws -> V.T")
         addLine("}")
         addLine("")
-        for (name, definition) in definitions {
-            writeStruct(name: name + base, base: base, definition: definition)
+        for name in definitions.keys.sorted() {
+            writeStruct(name: name + base, base: base, definition: definitions[name]!)
             addLine("")
         }
         return output
