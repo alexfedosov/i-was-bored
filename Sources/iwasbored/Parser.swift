@@ -57,7 +57,24 @@ final class Parser {
     }
 
     private func expression() throws -> Expression {
-        try equality()
+        try assignment()
+    }
+
+    private func assignment() throws -> Expression {
+        let expression = try equality()
+
+        if match(.Equal) {
+            let token = previous()
+            let assignment = try assignment()
+
+            guard let expression = expression as? VariableExpression else {
+                throw ParserError.InvalidAssignmentTarget(token: token)
+            }
+
+            return AssignmentExpression(name: expression.name, value: assignment)
+        }
+
+        return expression
     }
 
     private func equality() throws -> Expression {

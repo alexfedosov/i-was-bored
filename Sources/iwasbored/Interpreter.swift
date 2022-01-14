@@ -176,6 +176,12 @@ extension Interpreter: ExpressionVisitor {
     func visit(node: VariableExpression) throws -> Any? {
         return try environment.get(token: node.name)
     }
+
+    func visit(node: AssignmentExpression) throws -> Any? {
+        let value = try evaluate(expression: node.value)
+        try environment.assign(token: node.name, value: value)
+        return value
+    }
 }
 
 extension Interpreter: StatementVisitor {

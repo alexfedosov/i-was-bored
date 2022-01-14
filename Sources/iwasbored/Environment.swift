@@ -16,4 +16,11 @@ class Environment {
         }
         return boxedValue.value
     }
+
+    func assign(token: Token, value: Any?) throws {
+        guard let _ = variables[token.lexeme] else {
+            throw Interpreter.RuntimeError.UnknownVariable(line: token.line, name: token.lexeme)
+        }
+        variables[token.lexeme] = Box(value: value)
+    }
 }
