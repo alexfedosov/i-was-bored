@@ -31,4 +31,15 @@ var a = 12;
 }
 print(a); // --> 12
 
+// Equality checks
+print(1 > 2); // --> false
+print(1 >= 1); // --> true
+print(1 < 5); // --> true
+print(10 <= 5); // --> false
+print(true == false); // --> false
+print(false == false); // --> true
+print(false == nil); // --> false
+print(nil == nil); // --> true
+print("0" == 0); // --> false
+print("hello" == "hello"); // --> true
 ```
