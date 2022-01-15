@@ -19,7 +19,7 @@ class Interpreter {
         }
     }
 
-    let environment = Environment()
+    var environment = Environment()
     let errorReporter: ErrorReporter
 
     init(errorReporter: ErrorReporter) {
@@ -200,6 +200,16 @@ extension Interpreter: StatementVisitor {
     func visit(node: VarStatement) throws -> Any? {
         let value = try evaluate(expression: node.initializer)
         environment.declare(token: node.name, value: value)
+        return nil
+    }
+
+    func visit(node: BlockStatement) throws -> Any? {
+        let previousEnvironment = environment
+        environment = Environment(enclosing: previousEnvironment)
+        defer { environment = previousEnvironment }
+        for statement in node.statements {
+            _ = try statement.accept(visitor: self)
+        }
         return nil
     }
 }

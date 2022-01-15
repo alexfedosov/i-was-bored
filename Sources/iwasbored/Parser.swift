@@ -21,7 +21,6 @@ final class Parser {
 
     private func declaration() -> Statement? {
         do {
-            if match(.Var) { return try varDeclaration() }
             return try statement()
         } catch {
             synchronize()
@@ -42,18 +41,33 @@ final class Parser {
         return VarStatement(name: name, initializer: initializer)
     }
 
+    private func printStatement() throws -> Statement {
+        try consume(tokenType: .LeftParen)
+        let expression = try expression()
+        try consume(tokenType: .RightParen)
+        try consume(tokenType: .Semicolon)
+        return PrintStatement(expression: expression)
+    }
+
     private func statement() throws -> Statement {
-        if match(.Print) {
-            try consume(tokenType: .LeftParen)
-            let expression = try expression()
-            try consume(tokenType: .RightParen)
-            try consume(tokenType: .Semicolon)
-            return PrintStatement(expression: expression)
-        } else {
-            let statement = ExpressionStatement(expression: try expression())
-            try consume(tokenType: .Semicolon)
-            return statement
+        if match(.Var) { return try varDeclaration() }
+        if match(.Print) { return try printStatement() }
+        if match(.LeftBrace) { return BlockStatement(statements: try block()) }
+
+        let statement = ExpressionStatement(expression: try expression())
+        try consume(tokenType: .Semicolon)
+        return statement
+    }
+
+    private func block() throws -> [Statement] {
+        var statements: [Statement] = []
+        while !check(tokenType: [.RightBrace]) {
+            if let statement = declaration() {
+                statements.append(statement)
+            }
         }
+        try consume(tokenType: .RightBrace)
+        return statements
     }
 
     private func expression() throws -> Expression {

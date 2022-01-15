@@ -1,6 +1,7 @@
 protocol StatementVisitor {
   associatedtype T
   func visit(node: Statement) throws -> T
+  func visit(node: BlockStatement) throws -> T
   func visit(node: ExpressionStatement) throws -> T
   func visit(node: PrintStatement) throws -> T
   func visit(node: VarStatement) throws -> T
@@ -8,6 +9,14 @@ protocol StatementVisitor {
 
 protocol Statement {
   func accept<V: StatementVisitor>(visitor: V) throws -> V.T
+}
+
+struct BlockStatement: Statement {
+  let statements: [Statement]
+
+  func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
 }
 
 struct ExpressionStatement: Statement {
