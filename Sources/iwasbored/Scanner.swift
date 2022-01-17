@@ -21,6 +21,8 @@ final class Scanner {
             "false": .False,
             "nil": .Nil,
             "print": .Print,
+            "if": .If,
+            "else": .Else,
         ]
     }
 

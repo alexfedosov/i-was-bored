@@ -212,4 +212,13 @@ extension Interpreter: StatementVisitor {
         }
         return nil
     }
+
+    func visit(node: IfStatement) throws -> Any? {
+        if isTruthy(value: try evaluate(expression: node.condition)) {
+            _ = try node.thenBlock.accept(visitor: self)
+        } else {
+            _ = try node.elseBlock?.accept(visitor: self)
+        }
+        return nil
+    }
 }

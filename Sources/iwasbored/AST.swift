@@ -3,6 +3,7 @@ protocol StatementVisitor {
   func visit(node: Statement) throws -> T
   func visit(node: BlockStatement) throws -> T
   func visit(node: ExpressionStatement) throws -> T
+  func visit(node: IfStatement) throws -> T
   func visit(node: PrintStatement) throws -> T
   func visit(node: VarStatement) throws -> T
 }
@@ -21,6 +22,16 @@ struct BlockStatement: Statement {
 
 struct ExpressionStatement: Statement {
   let expression: Expression
+
+  func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct IfStatement: Statement {
+  let condition: Expression
+  let thenBlock: Statement
+  let elseBlock: Statement?
 
   func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)

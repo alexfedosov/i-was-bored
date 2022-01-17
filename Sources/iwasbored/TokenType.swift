@@ -37,6 +37,8 @@ enum TokenType {
     case False
     case Nil
     case Print
+    case If
+    case Else
 
     case Eof
 }
@@ -82,6 +84,8 @@ extension TokenType: CustomStringConvertible {
         case .False: return "false"
         case .Nil: return "nil"
         case .Print: return "print"
+        case .If: return "if"
+        case .Else: return "else"
 
         case .Eof: return "end of file"
         }

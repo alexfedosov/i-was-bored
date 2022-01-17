@@ -42,4 +42,19 @@ print(false == nil); // --> false
 print(nil == nil); // --> true
 print("0" == 0); // --> false
 print("hello" == "hello"); // --> true
+
+// Branching with if
+if 5 >= 5 {
+  print("5 is greater or equal to 5"); // --> 5 is greater or equal to 5
+}
+
+// Branching with if-else
+if false {
+  print("it is true");
+} else if 15 < 6 {
+  print("15 < 7");
+} else {
+  print("it is not"); // --> it is not
+}
+
 ```

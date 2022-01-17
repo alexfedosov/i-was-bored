@@ -49,10 +49,27 @@ final class Parser {
         return PrintStatement(expression: expression)
     }
 
+    private func ifStatement() throws -> Statement {
+        let condition = try expression()
+        try consume(tokenType: .LeftBrace)
+        let thenBlock = BlockStatement(statements: try block())
+        var elseBlock: Statement?
+        if match(.Else) {
+            if match(.If) {
+                elseBlock = try ifStatement()
+            } else {
+                try consume(tokenType: .LeftBrace)
+                elseBlock = BlockStatement(statements: try block())
+            }
+        }
+        return IfStatement(condition: condition, thenBlock: thenBlock, elseBlock: elseBlock)
+    }
+
     private func statement() throws -> Statement {
         if match(.Var) { return try varDeclaration() }
         if match(.Print) { return try printStatement() }
         if match(.LeftBrace) { return BlockStatement(statements: try block()) }
+        if match(.If) { return try ifStatement() }
 
         let statement = ExpressionStatement(expression: try expression())
         try consume(tokenType: .Semicolon)
