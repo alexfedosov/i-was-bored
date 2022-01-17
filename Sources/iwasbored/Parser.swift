@@ -78,7 +78,7 @@ final class Parser {
 
     private func block() throws -> [Statement] {
         var statements: [Statement] = []
-        while !check(tokenType: [.RightBrace]) {
+        while !isAtEnd && peek().type != .RightBrace {
             if let statement = declaration() {
                 statements.append(statement)
             }
@@ -235,6 +235,7 @@ extension Parser {
             .Var,
             .Return,
             .Print,
+            .If
         ]
 
         while !isAtEnd {
