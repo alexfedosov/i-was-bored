@@ -7,54 +7,54 @@ Current state of IWB:
 
 ```js
 // String concatenation
-var str = "hello";
-print(str + ", " + "world"); // --> hello, world
+var str = "hello"
+print(str + ", " + "world") // --> hello, world
 
 // Basic math
-var expr = (3 + 3) * 3 / -4.5 * (12 - -3.234);
-print(expr); // --> -60.936
+var expr = (3 + 3) * 3 / -4.5 * (12 - -3.234)
+print(expr) // --> -60.936
 
 // Variable shadowing
-var redefineMe = 1234;
-var redefineMe = "redefined";
-print(redefineMe); // --> redefined
+var redefineMe = 1234
+var redefineMe = "redefined"
+print(redefineMe) // --> redefined
 
 // Global and local scopes
-var a = 12;
+var a = 12
 {
-  var a = a * 3.14;
+  var a = a * 3.14
   {
-    var a = "inner a";
-    print(a); // --> inner a
+    var a = "inner a"
+    print(a) // --> inner a
   }
-  print(a); // --> 37.68
+  print(a) // --> 37.68
 }
-print(a); // --> 12
+print(a) // --> 12
 
 // Equality checks
-print(1 > 2); // --> false
-print(1 >= 1); // --> true
-print(1 < 5); // --> true
-print(10 <= 5); // --> false
-print(true == false); // --> false
-print(false == false); // --> true
-print(false == nil); // --> false
-print(nil == nil); // --> true
-print("0" == 0); // --> false
-print("hello" == "hello"); // --> true
+print(1 > 2) // --> false
+print(1 >= 1) // --> true
+print(1 < 5) // --> true
+print(10 <= 5) // --> false
+print(true == false) // --> false
+print(false == false) // --> true
+print(false == nil) // --> false
+print(nil == nil) // --> true
+print("0" == 0) // --> false
+print("hello" == "hello") // --> true
 
 // Branching with if
 if 5 >= 5 {
-  print("5 is greater or equal to 5"); // --> 5 is greater or equal to 5
+  print("5 is greater or equal to 5") // --> 5 is greater or equal to 5
 }
 
 // Branching with if-else
 if false {
-  print("it is true");
+  print("it is true")
 } else if 15 < 6 {
-  print("15 < 7");
+  print("15 < 7")
 } else {
-  print("it is not"); // --> it is not
+  print("it is not") // --> it is not
 }
 
 ```

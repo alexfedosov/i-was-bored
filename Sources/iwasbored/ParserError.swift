@@ -7,6 +7,7 @@ enum ParserError: LocalizedError {
     case CouldNotParseNumber(line: Int, lexeme: String)
     case UnexpectedCharacter(line: Int, character: Character)
     case InvalidAssignmentTarget(token: Token)
+    case UnexpectedToken(token: Token)
 
     var errorDescription: String? {
         switch self {
@@ -22,6 +23,9 @@ enum ParserError: LocalizedError {
             return "Unexpected character at \(line): \"\(character)\""
         case let .InvalidAssignmentTarget(token):
             return "Invalid assignment target at line \(token.line) \"\(token.lexeme)\""
+        case let .UnexpectedToken(token):
+            return "Unexpected token at line \(token.line) \"\(token.lexeme)\""
+                + " Did you try to use expression in place of statement?"
         }
     }
 }

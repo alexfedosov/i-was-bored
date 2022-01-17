@@ -37,7 +37,6 @@ final class Parser {
         } else {
             initializer = LiteralExpression(value: nil)
         }
-        try consume(tokenType: .Semicolon)
         return VarStatement(name: name, initializer: initializer)
     }
 
@@ -45,7 +44,6 @@ final class Parser {
         try consume(tokenType: .LeftParen)
         let expression = try expression()
         try consume(tokenType: .RightParen)
-        try consume(tokenType: .Semicolon)
         return PrintStatement(expression: expression)
     }
 
@@ -71,9 +69,7 @@ final class Parser {
         if match(.LeftBrace) { return BlockStatement(statements: try block()) }
         if match(.If) { return try ifStatement() }
 
-        let statement = ExpressionStatement(expression: try expression())
-        try consume(tokenType: .Semicolon)
-        return statement
+        throw ParserError.UnexpectedToken(token: peek())
     }
 
     private func block() throws -> [Statement] {
