@@ -62,6 +62,7 @@ protocol ExpressionVisitor {
   func visit(node: BinaryExpression) throws -> T
   func visit(node: GroupingExpression) throws -> T
   func visit(node: LiteralExpression) throws -> T
+  func visit(node: LogicalExpression) throws -> T
   func visit(node: UnaryExpression) throws -> T
   func visit(node: VariableExpression) throws -> T
 }
@@ -99,6 +100,16 @@ struct GroupingExpression: Expression {
 
 struct LiteralExpression: Expression {
   let value: Any?
+
+  func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct LogicalExpression: Expression {
+  let left: Expression
+  let op: Token
+  let right: Expression
 
   func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)

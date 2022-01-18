@@ -88,7 +88,7 @@ final class Parser {
     }
 
     private func assignment() throws -> Expression {
-        let expression = try equality()
+        let expression = try maybe()
 
         if match(.Equal) {
             let token = previous()
@@ -99,6 +99,39 @@ final class Parser {
             }
 
             return AssignmentExpression(name: expression.name, value: assignment)
+        }
+
+        return expression
+    }
+
+    private func maybe() throws -> Expression {
+        var expression = try or()
+        while match(.Maybe) {
+            let op = previous()
+            let right = try or()
+            expression = LogicalExpression(left: expression, op: op, right: right)
+        }
+
+        return expression
+    }
+
+    private func or() throws -> Expression {
+        var expression = try and()
+        while match(.Or) {
+            let op = previous()
+            let right = try and()
+            expression = LogicalExpression(left: expression, op: op, right: right)
+        }
+
+        return expression
+    }
+
+    private func and() throws -> Expression {
+        var expression = try equality()
+        while match(.And) {
+            let op = previous()
+            let right = try equality()
+            expression = LogicalExpression(left: expression, op: op, right: right)
         }
 
         return expression

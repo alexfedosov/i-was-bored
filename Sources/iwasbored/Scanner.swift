@@ -23,6 +23,9 @@ final class Scanner {
             "print": .Print,
             "if": .If,
             "else": .Else,
+            "and": .And,
+            "or": .Or,
+            "maybe": .Maybe,
         ]
     }
 

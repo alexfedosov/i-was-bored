@@ -96,6 +96,7 @@ let expressionClass = generator.generate(base: "Expression", definitions: [
     "Literal": "value: Any?",
     "Unary": "op: Token, right: Expression",
     "Variable": "name: Token",
+    "Logical": "left: Expression, op: Token, right: Expression",
 ])
 let output = [statementClass, expressionClass].joined(separator: "\n\n")
 

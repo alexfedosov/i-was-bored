@@ -182,6 +182,27 @@ extension Interpreter: ExpressionVisitor {
         try environment.assign(token: node.name, value: value)
         return value
     }
+
+    func visit(node: LogicalExpression) throws -> Any? {
+        switch node.op.type {
+        case .Maybe:
+            return try evaluate(expression: Bool.random() ? node.left : node.right)
+        case .And:
+            let left = try evaluate(expression: node.left)
+            if isTruthy(value: left) {
+                return try evaluate(expression: node.right)
+            }
+        case .Or:
+            let left = try evaluate(expression: node.left)
+            if !isTruthy(value: left) {
+                return try evaluate(expression: node.right)
+            } else {
+                return left
+            }
+        default: break
+        }
+        return nil
+    }
 }
 
 extension Interpreter: StatementVisitor {
