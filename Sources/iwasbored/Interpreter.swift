@@ -191,6 +191,8 @@ extension Interpreter: ExpressionVisitor {
             let left = try evaluate(expression: node.left)
             if isTruthy(value: left) {
                 return try evaluate(expression: node.right)
+            } else {
+                return left
             }
         case .Or:
             let left = try evaluate(expression: node.left)
