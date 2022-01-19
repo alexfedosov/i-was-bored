@@ -57,8 +57,8 @@ if false {
   print("it is not") // --> it is not
 }
 
-// Operator maybe
-print(1 maybe 2) // --> print 1 or 2
+// Operator maybe randomly picks left or right operand
+print(1 maybe 2) // --> prints 1 or 2
 
 // while loop
 var i = 10
