@@ -88,6 +88,7 @@ let statementClass = generator.generate(base: "Statement", definitions: [
     "Var": "name: Token, initializer: Expression",
     "Block": "statements: [Statement]",
     "If": "condition: Expression, thenBlock: Statement, elseBlock: Statement?",
+    "While": "condition: Expression, block: Statement",
 ])
 let expressionClass = generator.generate(base: "Expression", definitions: [
     "Assignment": "name: Token, value: Expression",

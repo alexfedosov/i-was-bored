@@ -6,6 +6,7 @@ protocol StatementVisitor {
   func visit(node: IfStatement) throws -> T
   func visit(node: PrintStatement) throws -> T
   func visit(node: VarStatement) throws -> T
+  func visit(node: WhileStatement) throws -> T
 }
 
 protocol Statement {
@@ -49,6 +50,15 @@ struct PrintStatement: Statement {
 struct VarStatement: Statement {
   let name: Token
   let initializer: Expression
+
+  func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct WhileStatement: Statement {
+  let condition: Expression
+  let block: Statement
 
   func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)

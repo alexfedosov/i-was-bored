@@ -63,13 +63,22 @@ final class Parser {
         return IfStatement(condition: condition, thenBlock: thenBlock, elseBlock: elseBlock)
     }
 
+    private func whileStatement() throws -> Statement {
+        let condition = try expression()
+        try consume(tokenType: .LeftBrace)
+        let block = BlockStatement(statements: try block())
+        return WhileStatement(condition: condition, block: block)
+    }
+
     private func statement() throws -> Statement {
         if match(.Var) { return try varDeclaration() }
         if match(.Print) { return try printStatement() }
         if match(.LeftBrace) { return BlockStatement(statements: try block()) }
         if match(.If) { return try ifStatement() }
+        if match(.While) { return try whileStatement() }
 
-        throw ParserError.UnexpectedToken(token: peek())
+        let expression = try expression()
+        return ExpressionStatement(expression: expression)
     }
 
     private func block() throws -> [Statement] {

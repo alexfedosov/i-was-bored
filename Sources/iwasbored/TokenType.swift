@@ -42,6 +42,7 @@ enum TokenType {
     case And
     case Or
     case Maybe
+    case While
 
     case Eof
 }
@@ -92,6 +93,7 @@ extension TokenType: CustomStringConvertible {
         case .And: return "and"
         case .Or: return "or"
         case .Maybe: return "maybe"
+        case .While: return "while"
 
         case .Eof: return "end of file"
         }

@@ -26,6 +26,7 @@ final class Scanner {
             "and": .And,
             "or": .Or,
             "maybe": .Maybe,
+            "while": .While,
         ]
     }
 

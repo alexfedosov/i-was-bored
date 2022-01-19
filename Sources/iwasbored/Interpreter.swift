@@ -244,4 +244,11 @@ extension Interpreter: StatementVisitor {
         }
         return nil
     }
+
+    func visit(node: WhileStatement) throws -> Any? {
+        while isTruthy(value: try evaluate(expression: node.condition)) {
+            _ = try node.block.accept(visitor: self)
+        }
+        return nil
+    }
 }

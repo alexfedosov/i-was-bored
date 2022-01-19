@@ -57,4 +57,14 @@ if false {
   print("it is not") // --> it is not
 }
 
+// Operator maybe
+print(1 maybe 2) // --> print 1 or 2
+
+// while loop
+var i = 10
+while i > 0 { 
+  print(i)
+  i = i - 1
+}
+
 ```
