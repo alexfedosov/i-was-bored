@@ -31,6 +31,7 @@ enum TokenType {
 
     // Keywords
     case Var
+    case Const
     case Func
     case Return
     case True
@@ -82,6 +83,7 @@ extension TokenType: CustomStringConvertible {
 
         // Keywords
         case .Var: return "var"
+        case .Const: return "const"
         case .Func: return "func"
         case .Return: return "return"
         case .True: return "true"

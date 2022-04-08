@@ -19,6 +19,10 @@ var redefineMe = 1234
 var redefineMe = "redefined"
 print(redefineMe) // --> redefined
 
+// Constant value
+const tryChangingMe = 100
+tryChangingMe = 500 // -> Runtime error
+
 // Global and local scopes
 var a = 12
 {

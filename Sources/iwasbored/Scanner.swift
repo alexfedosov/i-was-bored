@@ -15,6 +15,7 @@ final class Scanner {
         lexemeStart = currentCharacterIndex
         keywordMap = [
             "var": .Var,
+            "const": .Const,
             "func": .Func,
             "return": .Return,
             "true": .True,

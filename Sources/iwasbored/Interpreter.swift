@@ -6,6 +6,7 @@ class Interpreter {
     enum RuntimeError: LocalizedError {
         case TypeError(line: Int, expected: String, found: String)
         case UnknownVariable(line: Int, name: String)
+        case ReassigningConstantValue(line: Int, name: String)
 
         var errorDescription: String? {
             let desc: String
@@ -14,6 +15,8 @@ class Interpreter {
                 desc = "Type error at line \(line): expected \(expected), found \(found)"
             case let .UnknownVariable(line, name):
                 desc = "Unknown variable \(name) at line \(line)"
+            case let .ReassigningConstantValue(line, name):
+                desc = "Can not reassign value of constant \(name) at line \(line)"
             }
             return "[Runtime error]: \(desc)"
         }
@@ -177,6 +180,10 @@ extension Interpreter: ExpressionVisitor {
         return try environment.get(token: node.name)
     }
 
+    func visit(node: ConstantExpression) throws -> Any? {
+        return try environment.get(token: node.name)
+    }
+
     func visit(node: AssignmentExpression) throws -> Any? {
         let value = try evaluate(expression: node.value)
         try environment.assign(token: node.name, value: value)
@@ -222,7 +229,13 @@ extension Interpreter: StatementVisitor {
 
     func visit(node: VarStatement) throws -> Any? {
         let value = try evaluate(expression: node.initializer)
-        environment.declare(token: node.name, value: value)
+        environment.declare(token: node.name, value: value, mutable: true)
+        return nil
+    }
+
+    func visit(node: ConstStatement) throws -> Any? {
+        let value = try evaluate(expression: node.initializer)
+        environment.declare(token: node.name, value: value, mutable: false)
         return nil
     }
 

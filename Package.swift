@@ -14,12 +14,16 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .executableTarget(
             name: "iwasbored",
-            dependencies: []),
+            dependencies: []
+        ),
         .executableTarget(
             name: "astGen",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "iwasboredTests",
-            dependencies: ["iwasbored"]),
-    ]
+            dependencies: ["iwasbored"]
+        ),
+    ],
+    swiftLanguageVersions: [.v5]
 )

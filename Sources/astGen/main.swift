@@ -3,7 +3,7 @@ import Foundation
 @discardableResult
 func shell(_ args: String...) -> Int32 {
     let task = Process()
-    task.launchPath = "/usr/local/bin/swift-format"
+    task.launchPath = "/usr/bin/env"
     task.arguments = args
     task.launch()
     task.waitUntilExit()
@@ -86,6 +86,7 @@ let statementClass = generator.generate(base: "Statement", definitions: [
     "Expression": "expression: Expression",
     "Print": "expression: Expression",
     "Var": "name: Token, initializer: Expression",
+    "Const": "name: Token, initializer: Expression",
     "Block": "statements: [Statement]",
     "If": "condition: Expression, thenBlock: Statement, elseBlock: Statement?",
     "While": "condition: Expression, block: Statement",
@@ -97,6 +98,7 @@ let expressionClass = generator.generate(base: "Expression", definitions: [
     "Literal": "value: Any?",
     "Unary": "op: Token, right: Expression",
     "Variable": "name: Token",
+    "Constant": "name: Token",
     "Logical": "left: Expression, op: Token, right: Expression",
 ])
 let output = [statementClass, expressionClass].joined(separator: "\n\n")
@@ -104,5 +106,5 @@ let output = [statementClass, expressionClass].joined(separator: "\n\n")
 let filePath = URL(fileURLWithPath: outputFile)
 do {
     try (output as NSString).write(to: filePath, atomically: true, encoding: String.Encoding.utf8.rawValue)
-    exit(shell("--in-place", outputFile))
+    exit(shell("swift-format", "-i", outputFile))
 } catch { print(error) }

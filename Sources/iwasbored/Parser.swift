@@ -40,6 +40,17 @@ final class Parser {
         return VarStatement(name: name, initializer: initializer)
     }
 
+    private func constDeclaration() throws -> Statement {
+        let name = try consume(tokenType: .Identifier)
+        let initializer: Expression
+        if match(.Equal) {
+            initializer = try expression()
+        } else {
+            initializer = LiteralExpression(value: nil)
+        }
+        return ConstStatement(name: name, initializer: initializer)
+    }
+
     private func printStatement() throws -> Statement {
         try consume(tokenType: .LeftParen)
         let expression = try expression()
@@ -72,6 +83,7 @@ final class Parser {
 
     private func statement() throws -> Statement {
         if match(.Var) { return try varDeclaration() }
+        if match(.Const) { return try constDeclaration() }
         if match(.Print) { return try printStatement() }
         if match(.LeftBrace) { return BlockStatement(statements: try block()) }
         if match(.If) { return try ifStatement() }

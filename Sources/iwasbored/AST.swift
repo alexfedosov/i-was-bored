@@ -2,6 +2,7 @@ protocol StatementVisitor {
   associatedtype T
   func visit(node: Statement) throws -> T
   func visit(node: BlockStatement) throws -> T
+  func visit(node: ConstStatement) throws -> T
   func visit(node: ExpressionStatement) throws -> T
   func visit(node: IfStatement) throws -> T
   func visit(node: PrintStatement) throws -> T
@@ -15,6 +16,15 @@ protocol Statement {
 
 struct BlockStatement: Statement {
   let statements: [Statement]
+
+  func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct ConstStatement: Statement {
+  let name: Token
+  let initializer: Expression
 
   func accept<V: StatementVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)
@@ -70,6 +80,7 @@ protocol ExpressionVisitor {
   func visit(node: Expression) throws -> T
   func visit(node: AssignmentExpression) throws -> T
   func visit(node: BinaryExpression) throws -> T
+  func visit(node: ConstantExpression) throws -> T
   func visit(node: GroupingExpression) throws -> T
   func visit(node: LiteralExpression) throws -> T
   func visit(node: LogicalExpression) throws -> T
@@ -94,6 +105,14 @@ struct BinaryExpression: Expression {
   let left: Expression
   let op: Token
   let right: Expression
+
+  func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct ConstantExpression: Expression {
+  let name: Token
 
   func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)

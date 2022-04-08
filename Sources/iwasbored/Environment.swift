@@ -1,6 +1,7 @@
 class Environment {
     struct Box {
         let value: Any?
+        let mutable: Bool
     }
 
     private var enclosing: Environment?
@@ -10,9 +11,9 @@ class Environment {
         self.enclosing = enclosing
     }
 
-    func declare(token: Token, value: Any?) {
+    func declare(token: Token, value: Any?, mutable: Bool) {
         // we allow redeclaration on purpose
-        variables[token.lexeme] = Box(value: value)
+        variables[token.lexeme] = Box(value: value, mutable: mutable)
     }
 
     func get(token: Token) throws -> Any? {
@@ -26,8 +27,11 @@ class Environment {
     }
 
     func assign(token: Token, value: Any?) throws {
-        if let _ = variables[token.lexeme] {
-            variables[token.lexeme] = Box(value: value)
+        if let variable = variables[token.lexeme] {
+            guard variable.mutable else {
+                throw Interpreter.RuntimeError.ReassigningConstantValue(line: token.line, name: token.lexeme)
+            }
+            variables[token.lexeme] = Box(value: value, mutable: true)
         } else if let enclosing = enclosing {
             try enclosing.assign(token: token, value: value)
         } else {
