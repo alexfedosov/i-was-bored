@@ -28,10 +28,9 @@ class IWasBored {
         print("Type an expression to evaluate or an empty line to exit")
         while true {
             print("> ", terminator: "")
-            if let line = readLine() {
-                if line.isEmpty { break }
-                _ = run(line)
-            }
+                guard let line = readLine(),
+                      !line.isEmpty else { break }
+            _ = run(line)
         }
         print("Bye..")
     }
