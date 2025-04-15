@@ -29,7 +29,7 @@ final class iwasboredTests: XCTestCase {
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         let output = String(data: data, encoding: .utf8)
 
-        XCTAssertEqual(output, "Hello, world!\n")
+        XCTAssertEqual(output, "Welcome to IWasBored REPL!\nType an expression to evaluate or an empty line to exit\n> Bye..\n")
         #endif
     }
 
