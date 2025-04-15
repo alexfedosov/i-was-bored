@@ -3,9 +3,9 @@ import Foundation
 @discardableResult
 func shell(_ args: String...) -> Int32 {
     let task = Process()
-    task.launchPath = "/usr/bin/env"
+    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = args
-    task.launch()
+    try? task.run()
     task.waitUntilExit()
     return task.terminationStatus
 }
