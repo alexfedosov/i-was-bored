@@ -59,6 +59,8 @@ final class Scanner {
         case ")": addToken(type: .RightParen)
         case "{": addToken(type: .LeftBrace)
         case "}": addToken(type: .RightBrace)
+        case "[": addToken(type: .LeftBracket)
+        case "]": addToken(type: .RightBracket)
         case ",": addToken(type: .Comma)
         case ".": addToken(type: .Dot)
         case ":": addToken(type: .Colon)

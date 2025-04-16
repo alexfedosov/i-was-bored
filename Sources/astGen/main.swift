@@ -100,6 +100,9 @@ let expressionClass = generator.generate(base: "Expression", definitions: [
     "Variable": "name: Token",
     "Constant": "name: Token",
     "Logical": "left: Expression, op: Token, right: Expression",
+    "Array": "elements: [Expression]",
+    "Subscript": "array: Expression, index: Expression",
+    "Call": "callee: Expression, name: Token, arguments: [Expression]",
 ])
 let output = [statementClass, expressionClass].joined(separator: "\n\n")
 

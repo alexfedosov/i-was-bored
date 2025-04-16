@@ -8,6 +8,8 @@ enum ParserError: LocalizedError {
     case UnexpectedCharacter(line: Int, character: Character)
     case InvalidAssignmentTarget(token: Token)
     case UnexpectedToken(token: Token)
+    case InvalidArrayIndex(token: Token)
+    case InvalidMethodCall(token: Token, method: String)
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +28,10 @@ enum ParserError: LocalizedError {
         case let .UnexpectedToken(token):
             return "Unexpected token at line \(token.line) \"\(token.lexeme)\""
                 + " Did you try to use expression in place of statement?"
+        case let .InvalidArrayIndex(token):
+            return "Invalid array index at line \(token.line) \"\(token.lexeme)\""
+        case let .InvalidMethodCall(token, method):
+            return "Invalid method call at line \(token.line): \"\(method)\""
         }
     }
 }

@@ -14,6 +14,8 @@ enum TokenType {
     case RightParen
     case LeftBrace
     case RightBrace
+    case LeftBracket
+    case RightBracket
     case Comma
     case Dot
     case Colon
@@ -66,6 +68,8 @@ extension TokenType: CustomStringConvertible {
         case .RightParen: return ")"
         case .LeftBrace: return "{"
         case .RightBrace: return "}"
+        case .LeftBracket: return "["
+        case .RightBracket: return "]"
         case .Comma: return ","
         case .Dot: return "."
         case .Colon: return ":"

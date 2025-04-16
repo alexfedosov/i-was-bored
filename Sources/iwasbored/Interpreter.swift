@@ -7,6 +7,8 @@ class Interpreter {
         case TypeError(line: Int, expected: String, found: String)
         case UnknownVariable(line: Int, name: String)
         case ReassigningConstantValue(line: Int, name: String)
+        case IndexOutOfBounds(line: Int, index: Int, size: Int)
+        case UnsupportedMethod(line: Int, type: String, method: String)
 
         var errorDescription: String? {
             let desc: String
@@ -17,6 +19,10 @@ class Interpreter {
                 desc = "Unknown variable \(name) at line \(line)"
             case let .ReassigningConstantValue(line, name):
                 desc = "Can not reassign value of constant \(name) at line \(line)"
+            case let .IndexOutOfBounds(line, index, size):
+                desc = "Index out of bounds at line \(line): index \(index), size \(size)"
+            case let .UnsupportedMethod(line, type, method):
+                desc = "Unsupported method \(method) for type \(type) at line \(line)"
             }
             return "[Runtime error]: \(desc)"
         }
@@ -66,6 +72,17 @@ extension Interpreter {
         guard let left = left, let right = right else {
             return left == nil && right == nil
         }
+        
+        if let leftArray = left as? [Any?], let rightArray = right as? [Any?] {
+            guard leftArray.count == rightArray.count else { return false }
+            for i in 0..<leftArray.count {
+                if !isEqual(leftArray[i], rightArray[i]) {
+                    return false
+                }
+            }
+            return true
+        }
+        
         return isTypedEqual(type: Double.self, a: left, b: right) ||
             isTypedEqual(type: Bool.self, a: left, b: right) ||
             isTypedEqual(type: String.self, a: left, b: right)
@@ -83,6 +100,14 @@ extension Interpreter {
 
     func stringify(value: Any?) -> String {
         guard let value = value else { return "nil" }
+        
+        if let array = value as? [Any?] {
+            var elements: [String] = []
+            for element in array {
+                elements.append(stringify(value: element))
+            }
+            return "[\(elements.joined(separator: ", "))]"
+        }
 
         if value is Double {
             let doubleRepresentation = String(value as! Double)
@@ -102,6 +127,98 @@ extension Interpreter: ExpressionVisitor {
 
     func visit(node: LiteralExpression) throws -> Any? {
         node.value
+    }
+    
+    func visit(node: ArrayExpression) throws -> Any? {
+        var elements: [Any?] = []
+        for element in node.elements {
+            elements.append(try evaluate(expression: element))
+        }
+        return elements
+    }
+    
+    func visit(node: SubscriptExpression) throws -> Any? {
+        let array = try evaluate(expression: node.array)
+        try typeCheck(value: array, type: [Any?].self, typeName: "Array", line: 0)
+        
+        let index = try evaluate(expression: node.index)
+        try typeCheck(value: index, type: Double.self, typeName: "Number", line: 0)
+        
+        let intIndex = Int(index as! Double)
+        let arrayValue = array as! [Any?]
+        
+        guard intIndex >= 0 && intIndex < arrayValue.count else {
+            throw RuntimeError.IndexOutOfBounds(line: 0, index: intIndex, size: arrayValue.count)
+        }
+        
+        return arrayValue[intIndex]
+    }
+    
+    func visit(node: CallExpression) throws -> Any? {
+        let object = try evaluate(expression: node.callee)
+        let method = node.name.lexeme
+        
+        if let array = object as? [Any?] {
+            switch method {
+            case "push":
+                guard node.arguments.count == 1 else {
+                    throw RuntimeError.UnsupportedMethod(line: node.name.line, type: "Array", method: "\(method) with \(node.arguments.count) arguments")
+                }
+                let value = try evaluate(expression: node.arguments[0])
+                var newArray = array
+                newArray.append(value)
+                return newArray
+                
+            case "pop":
+                guard node.arguments.count == 0 else {
+                    throw RuntimeError.UnsupportedMethod(line: node.name.line, type: "Array", method: "\(method) with \(node.arguments.count) arguments")
+                }
+                guard !array.isEmpty else {
+                    throw RuntimeError.IndexOutOfBounds(line: node.name.line, index: -1, size: array.count)
+                }
+                let value = array.last
+                var newArray = array
+                newArray.removeLast()
+                return value as Any?
+                
+            case "get":
+                guard node.arguments.count == 1 else {
+                    throw RuntimeError.UnsupportedMethod(line: node.name.line, type: "Array", method: "\(method) with \(node.arguments.count) arguments")
+                }
+                let index = try evaluate(expression: node.arguments[0])
+                try typeCheck(value: index, type: Double.self, typeName: "Number", line: node.name.line)
+                
+                let intIndex = Int(index as! Double)
+                guard intIndex >= 0 && intIndex < array.count else {
+                    throw RuntimeError.IndexOutOfBounds(line: node.name.line, index: intIndex, size: array.count)
+                }
+                
+                return array[intIndex]
+                
+            case "set":
+                guard node.arguments.count == 2 else {
+                    throw RuntimeError.UnsupportedMethod(line: node.name.line, type: "Array", method: "\(method) with \(node.arguments.count) arguments")
+                }
+                let index = try evaluate(expression: node.arguments[0])
+                try typeCheck(value: index, type: Double.self, typeName: "Number", line: node.name.line)
+                
+                let value = try evaluate(expression: node.arguments[1])
+                let intIndex = Int(index as! Double)
+                
+                guard intIndex >= 0 && intIndex < array.count else {
+                    throw RuntimeError.IndexOutOfBounds(line: node.name.line, index: intIndex, size: array.count)
+                }
+                
+                var newArray = array
+                newArray[intIndex] = value
+                return newArray
+                
+            default:
+                throw RuntimeError.UnsupportedMethod(line: node.name.line, type: "Array", method: method)
+            }
+        }
+        
+        throw RuntimeError.UnsupportedMethod(line: node.name.line, type: String(describing: type(of: object)), method: method)
     }
 
     func visit(node: BinaryExpression) throws -> Any? {

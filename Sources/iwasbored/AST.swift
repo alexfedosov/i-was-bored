@@ -78,18 +78,29 @@ struct WhileStatement: Statement {
 protocol ExpressionVisitor {
   associatedtype T
   func visit(node: Expression) throws -> T
+  func visit(node: ArrayExpression) throws -> T
   func visit(node: AssignmentExpression) throws -> T
   func visit(node: BinaryExpression) throws -> T
+  func visit(node: CallExpression) throws -> T
   func visit(node: ConstantExpression) throws -> T
   func visit(node: GroupingExpression) throws -> T
   func visit(node: LiteralExpression) throws -> T
   func visit(node: LogicalExpression) throws -> T
+  func visit(node: SubscriptExpression) throws -> T
   func visit(node: UnaryExpression) throws -> T
   func visit(node: VariableExpression) throws -> T
 }
 
 protocol Expression {
   func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T
+}
+
+struct ArrayExpression: Expression {
+  let elements: [Expression]
+
+  func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
 }
 
 struct AssignmentExpression: Expression {
@@ -105,6 +116,16 @@ struct BinaryExpression: Expression {
   let left: Expression
   let op: Token
   let right: Expression
+
+  func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct CallExpression: Expression {
+  let callee: Expression
+  let name: Token
+  let arguments: [Expression]
 
   func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)
@@ -139,6 +160,15 @@ struct LogicalExpression: Expression {
   let left: Expression
   let op: Token
   let right: Expression
+
+  func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
+    try visitor.visit(node: self)
+  }
+}
+
+struct SubscriptExpression: Expression {
+  let array: Expression
+  let index: Expression
 
   func accept<V: ExpressionVisitor>(visitor: V) throws -> V.T {
     try visitor.visit(node: self)

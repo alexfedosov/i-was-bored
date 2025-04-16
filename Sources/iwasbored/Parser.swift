@@ -213,7 +213,32 @@ final class Parser {
             return UnaryExpression(op: op, right: right)
         }
 
-        return try primary()
+        var expr = try primary()
+        
+        while true {
+            if match(.LeftBracket) {
+                let index = try expression()
+                try consume(tokenType: .RightBracket)
+                expr = SubscriptExpression(array: expr, index: index)
+            } else if match(.Dot) {
+                let name = try consume(tokenType: .Identifier)
+                
+                if match(.LeftParen) {
+                    var arguments: [Expression] = []
+                    if !check(tokenType: [.RightParen]) {
+                        repeat {
+                            arguments.append(try expression())
+                        } while match(.Comma)
+                    }
+                    try consume(tokenType: .RightParen)
+                    expr = CallExpression(callee: expr, name: name, arguments: arguments)
+                }
+            } else {
+                break
+            }
+        }
+        
+        return expr
     }
 
     private func primary() throws -> Expression {
@@ -225,6 +250,17 @@ final class Parser {
         if match(.String) { return LiteralExpression(value: previous().lexeme) }
 
         if match(.Identifier) { return VariableExpression(name: previous()) }
+        
+        if match(.LeftBracket) {
+            var elements: [Expression] = []
+            if !check(tokenType: [.RightBracket]) {
+                repeat {
+                    elements.append(try expression())
+                } while match(.Comma)
+            }
+            try consume(tokenType: .RightBracket)
+            return ArrayExpression(elements: elements)
+        }
 
         if match(.LeftParen) {
             let expression = try expression()
